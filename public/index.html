@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en/ua">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>GPS</title>
+
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+  <link rel="stylesheet" href="/style.css" />
+</head>
+
+<body>
+  <div id="presentBlock" class="box">
+    <h1>GPS</h1>
+    <p align="center">
+      <b>Розробка додатку для візуалізації вимірювань GPS</b>
+    </p>
+    <p align="center">Виконав студент: Прокопенко Євгеній ІПЗ-4.04</p>
+    <p align="center">
+      з дисципліни: <b>"Розробка та програмування координатних систем"</b>
+    </p>
+  </div>
+
+  <div id="plot" class="box"></div>
+
+  <form id="GPSConfigForm" class="box">
+    <div class="inputsBox">
+
+      <div class="inputContainer" data-config="GPSService">
+        <label for="emulationZoneSizeWidth">Ширина зони емуляції (кілометри):</label>
+        <input type="text" id="emulationZoneSizeWidth" name="emulationZoneSize.width"
+          data-validation="validateBaseNumber" />
+        <div id="errorEmulationZoneSizeWidth" class="error"></div>
+      </div>
+
+      <div class="inputContainer" data-config="GPSService">
+        <label for="emulationZoneSizeHeight">Висота зони емуляції (кілометри):</label>
+        <input type="text" id="emulationZoneSizeHeight" name="emulationZoneSize.height"
+          data-validation="validateBaseNumber" />
+        <div id="errorEmulationZoneSizeHeight" class="error"></div>
+      </div>
+
+      <div class="inputContainer" data-config="GPSService">
+        <label for="messageFrequency">Частота передачі повідомлень (повідомлення/с):</label>
+        <input type="text" id="messageFrequency" name="messageFrequency" data-validation="validateBaseInt" />
+        <div id="errorMessageFrequency" class="error"></div>
+      </div>
+
+      <div class="inputContainer" data-config="GPSService">
+        <label for="satelliteSpeed">Швидкість супутників (км/год):</label>
+        <input type="text" id="satelliteSpeed" name="satelliteSpeed" data-validation="validateBaseNumber" />
+        <div id="errorSatelliteSpeed" class="error"></div>
+      </div>
+
+      <div class="inputContainer" data-config="GPSService">
+        <label for="objectSpeed">Швидкість об'єкта (км/год):</label>
+        <input type="text" id="objectSpeed" name="objectSpeed" data-validation="validateBaseNumber" />
+        <div id="errorObjectSpeed" class="error"></div>
+      </div>
+
+      <div class="inputContainer" data-config="GPSStorage">
+        <label for="storageTime">Час зберігання в GPSStorage (мілісекунди):</label>
+        <input type="text" id="storageTime" name="storageTime" data-validation="validateBaseInt" />
+        <div id="errorStorageTime" class="error"></div>
+      </div>
+    </div>
+
+    <button type="submit">Надіслати</button>
+  </form>
+
+
+
+  <script type="module">
+    // Importing necessary modules for GPS functionality
+    import { GPSService } from "/src/GPSService.js";
+    import { GPSGraph } from "/src/GPSGraph.js";
+    import { GPSConfig } from "/src/GPSConfig.js";
+    import { GPSConfigValidator } from "/src/GPSConfigValidator.js";
+    import { GPSStorage } from "/src/GPSStorage.js";
+
+    // Defining properties for GPS service
+    let GPSServiceProps = {
+      configUrl: "http://localhost:3000/api/config",
+      socketUrl: "ws://localhost:4001",
+      eventName: "gpsDataReceived",
+    };
+
+    // Initializing GPSService, GPSGraph, GPSStorage, and GPSConfigValidator instances
+    const gpsService = new GPSService(GPSServiceProps);
+    const gpsGraph = new GPSGraph("plot");
+    const gpsStorage = new GPSStorage();
+    const gpsValidator = new GPSConfigValidator();
+
+   
+    async function main() {
+      // Fetching configuration for GPS service
+      await gpsService.fetchConfiguration();
+
+      // Connecting WebSocket for real-time GPS data
+      gpsService.connectWebSocket();
+
+      const formElement = document.getElementById("GPSConfigForm");
+
+      // Initializing GPS configuration with validation
+      const gpsConfig = new GPSConfig(formElement, gpsValidator, function (config) {
+        gpsService.updateConfiguration(config.GPSService);
+        gpsGraph.updateConfiguration(config);
+        gpsStorage.updateConfiguration(config);
+      });
+
+      // Setting initial configuration for GPS service and storage
+      let config = {};
+      config["GPSService"] = gpsService.config;
+      config["GPSStorage"] = gpsStorage.config;
+
+      gpsConfig.setConfig(config);
+
+      // Adding event listener for receiving GPS data
+      window.addEventListener("gpsDataReceived", (event) => {
+        const gpsData = event.detail;
+        gpsStorage.addSateliteData(gpsData);
+      });
+
+      // Updating configuration for GPS graph and storage
+      gpsGraph.updateConfiguration(config);
+      gpsStorage.updateConfiguration(config);
+
+      // Initializing the GPS graph with stored satellite data
+      gpsGraph.init(gpsStorage);
+    }
+
+    // Running the main function when the document is ready
+    $(document).ready(function () {
+      main();
+    });
+
+</script>
+
+
+</body>
+
+</html>
