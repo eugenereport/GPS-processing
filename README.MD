@@ -1,18 +1,7 @@
 ## Титул
-
-<br>
-
-<p align="center" style="font-size: 30px;">
-    <b>Розробка додатку для візуалізації вимірювань GPS</b>
-</p>
-<p align="center" style="font-size: 24px;">
-    Виконав студент: Прокопенко Євгеній ІПЗ-4.04
-</p>
-<p align="center" style="font-size: 24px;">
-    з дисципліни: <b>"Розробка та програмування координатних систем"</b>
-</p>
-
-<br>
+## Розробка додатку для візуалізації вимірювань GPS
+## Виконав студент: Прокопенко Євгеній ІПЗ-4.04
+## з дисципліни: **"Розробка та програмування координатних систем"**
 
 ## Мета
 
@@ -476,21 +465,13 @@ const gpsValidator = new GPSConfigValidator();
 
 **Результат:**
 
-<br>
-<div align="center">
-    <img src="screenshots/1_gps_test.gif" alt="Тестування gps" width="700px"  >
-</div>
-<br>
+![Тестування gps](screenshots/1_gps_test.gif)
 
 Спробуємо змінити параметри GPS.
 
 **Результат:**
 
-<br>
-<div align="center">
-    <img src="screenshots/2_gps_config_change_test.gif" alt="Перевірка оновлення конфігурації" width="700px"  >
-</div>
-<br>
+![Перевірка оновлення конфігурації](screenshots/2_gps_config_change_test.gif)
 
 **GPS працює, запити зміни конфігурації виконуються!**
 
